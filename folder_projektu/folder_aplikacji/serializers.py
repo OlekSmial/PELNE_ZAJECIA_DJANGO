@@ -22,9 +22,9 @@ class PersonSerializer(serializers.Serializer):
     # np. team=Team({id}) lub wcześniejszym stworzeniu nowej instancji tej klasy
     team = serializers.PrimaryKeyRelatedField(queryset=Team.objects.all())
 
-    pseudonim = serializers.CharField(max_lenght=100, allow_blank = True)
+    pseudonim = serializers.CharField(max_length=100, allow_blank = True)
 
-    
+
 
     # przesłonięcie metody create() z klasy serializers.Serializer
     def create(self, validated_data):
@@ -34,7 +34,7 @@ class PersonSerializer(serializers.Serializer):
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
         instance.shirt_size = validated_data.get('shirt_size', instance.shirt_size)
-        instance.month_added = validated_data.get('month_added', instance.month.added)
+        instance.month_added = validated_data.get('month_added', instance.month_added)
         instance.team = validated_data.get('team', instance.team)
         instance.pseudonim = validated_data.get('pseudonim', instance.pseudonim)
         instance.save()
