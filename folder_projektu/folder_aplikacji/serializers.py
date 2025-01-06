@@ -24,6 +24,16 @@ class PersonSerializer(serializers.Serializer):
 
     pseudonim = serializers.CharField(max_length=100, allow_blank = True)
 
+# fragment klasy PersonSerializer
+
+# walidacja wartości pola name
+    def validate_name(self, value):
+
+        if not value.istitle():
+            raise serializers.ValidationError(
+                "Nazwa osoby powinna rozpoczynać się wielką literą!",
+            )
+        return value
 
 
     # przesłonięcie metody create() z klasy serializers.Serializer
