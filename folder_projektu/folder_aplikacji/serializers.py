@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Person, Team, MONTHS, SHIRT_SIZES
+from .models import Person, Team, MONTHS, SHIRT_SIZES, Stanowisko, osoba
 
 
 class PersonSerializer(serializers.Serializer):
@@ -49,3 +49,37 @@ class PersonSerializer(serializers.Serializer):
         instance.pseudonim = validated_data.get('pseudonim', instance.pseudonim)
         instance.save()
         return instance
+    
+
+# class PersonModelSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         # musimy wskazać klasę modelu
+#         model = Person
+#         # definiując poniższe pole możemy określić listę właściwości modelu,
+#         # które chcemy serializować
+#         fields = ['id', 'name', 'miesiac_dodania', 'shirt_size', 'team']
+#         # definicja pola modelu tylko do odczytu
+#         read_only_fields = ['id']
+
+class StanowiskoSerializer(serializers.Serializer):
+    nazwa = serializers.CharField(max_length = 80)
+    opis = serializers.CharField()
+
+    def create(self, validated_data):
+        return Stanowisko.objects.create(**validated_data)
+    
+    def update(self, instance, validated_data):
+        instance.nazwa = validated_data.get('nazwa', instance.nazwa)
+        instance.opis = validated_data.get('opis', instance.opis)
+        instance.save()
+        return instance
+    
+class TeamSerializer(serializers.ModelSerializer):
+    model = Team
+    fields = ['id', 'name', 'country']
+    read_only_fields = ['id']
+
+class osobaSerializer(serializers.ModelSerializer) :
+    model = osoba 
+    fields = ['id', 'imie', 'nazwisko', 'stanowisko', 'data_dodania', 'plec']
+    read_only_fields = ['id', 'data_dodania']
