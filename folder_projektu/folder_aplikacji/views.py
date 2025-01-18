@@ -2,7 +2,9 @@ from django.shortcuts import render
 
 from django.shortcuts import render
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,authentication_classes, permission_classes
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Person, Team
 from .serializers import PersonSerializer
@@ -21,7 +23,9 @@ def person_list(request):
         return Response(serializer.data)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
 def person_detail(request, pk):
 
     """
@@ -42,7 +46,23 @@ def person_detail(request, pk):
         serializer = PersonSerializer(person)
         return Response(serializer.data)
 
-    elif request.method == 'PUT':
+
+@api_view(['PUT', 'DELETE'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def person_update_delete(request, pk):
+
+    """
+    :param request: obiekt DRF Request
+    :param pk: id obiektu Person
+    :return: Response (with status and/or object/s data)
+    """
+    try:
+        person = Person.objects.get(pk=pk)
+    except Person.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'PUT':
         serializer = PersonSerializer(person, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -72,14 +92,6 @@ def person_list_html(request):
                   {'persons': persons})
 
 def person_detail_html(request, id):
-    # pobieramy konkretny obiekt Person
-    person = Person.objects.get(id=id)
-
-    return render(request,
-                  "folder_aplikacji/person/detail.html",
-                  {'person': person})
-
-def person_detail(request, id):
     # pobieramy konkretny obiekt Person
     try:
         person = Person.objects.get(id=id)
