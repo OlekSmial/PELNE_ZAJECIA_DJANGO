@@ -11,7 +11,7 @@ from .serializers import PersonSerializer
 from django.http import HttpResponse
 import datetime
 from django.http import Http404, HttpResponse
-# określamy dostępne metody żądania dla tego endpointu
+# określamy dostępne metody żądania dla tego endpointu.
 @api_view(['GET'])
 def person_list(request):
     """
