@@ -6,8 +6,8 @@ from rest_framework.decorators import api_view,authentication_classes, permissio
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .models import Person, Team
-from .serializers import PersonSerializer
+from .models import Person, Team, osoba
+from .serializers import PersonSerializer, osobaSerializer
 from django.http import HttpResponse
 import datetime
 from django.http import Http404, HttpResponse
@@ -72,6 +72,40 @@ def person_update_delete(request, pk):
     elif request.method == 'DELETE':
         person.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+@api_view(['GET', 'POST'])
+def osoba_list(request):
+    if request.method == "GET":
+        osoby = osoba.objects.all()
+        serializer = osobaSerializer(osoby, many = True)
+        return Response(serializer.data)
+    if request.method == "POST" :
+        serializer = osobaSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status= status.HTTP_201_CREATED)
+        return Response(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET', 'DELATE'])
+def osoba_detail(request, pk):
+    try:
+        osobaa = osoba.objects.get(pk=pk)
+    except osoba.DoesNotExist :
+        return Response(status = status.HTTP_404_NOT_FOUND)
+    
+    if request.method == "GET" :
+        serializer = osobaSerializer(osobaa)
+        return Response(serializer.data)
+    elif request.method == "DELATE":
+        osobaa.delete()
+        return Response(status = status.HTTP_204_NO_CONTENT)
+    
+@api_view(['GET'])
+def osoba_search(request, substring):
+    osobyy = osoba.objects.filter(imie__icontains = substring) | osoba.objects.filter(nazwisko__icontains = substring)
+    serializer = osobaSerializer(osobyy, many = True)
+    return Response(serializer.data)
+
 
 # Create your views here.
 

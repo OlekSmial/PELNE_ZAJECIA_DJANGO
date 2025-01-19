@@ -10,4 +10,7 @@ urlpatterns = [
     path('welcome/', views.welcome_view),
     path('persons_html/', views.person_list_html),
     path('persons_html/<int:id>/', views.person_detail_html),
+    path('osoby/', views.osoba_list),
+    path('osoby/<int:pk>/', views.osoba_detail),
+    path('osoby/search<str:substring>/', views.osoba_search),
 ]
