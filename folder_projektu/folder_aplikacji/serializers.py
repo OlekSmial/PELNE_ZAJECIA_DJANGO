@@ -96,11 +96,7 @@ class osobaSerializer(serializers.ModelSerializer) :
         if value > date.today():
             raise serializers.ValidationError("Pole 'data_dodania' nie moze być z przyszlosci!!!")
         return value
-        
-
-        
-        
-
+    
     class Meta:
         model = osoba 
         fields = ['id', 'imie', 'nazwisko', 'stanowisko', 'data_dodania', 'plec']
