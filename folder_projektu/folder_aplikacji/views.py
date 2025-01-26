@@ -7,16 +7,23 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Person, Team, osoba
-from .serializers import PersonSerializer, osobaSerializer
+from.permissions import CustomDjangoModelPermissions
+from .serializers import PersonSerializer, osobaSerializer, TeamSerializer
 from django.http import HttpResponse
 import datetime
 from django.http import Http404, HttpResponse
+from django.core.exceptions import PermissionDenied
+from django.contrib.auth.decorators import permission_required, login_required
+
 # określamy dostępne metody żądania dla tego endpointu.
 @api_view(['GET'])
 def person_list(request):
     """
     Lista wszystkich obiektów modelu Person.
     """
+    if not request.user.has_perm('folder_aplikacji.view_person'):
+        raise PermissionDenied()
+    
     if request.method == 'GET':
         persons = Person.objects.all()
         serializer = PersonSerializer(persons, many=True)
@@ -87,7 +94,11 @@ def person_delete(request, pk):
 @permission_classes([IsAuthenticated])
 def osoba_list(request):
     if request.method == "GET":
-        osoby = osoba.objects.filter(wlasciciel = request.user)
+        if not request.user.has.perm('older_aplikacji.view_person_other_owner'):
+            osoby = osoba.objects.filter(wlasciciel = request.user)
+        else:
+            osoby = osoba.objects.all()
+
         serializer = osobaSerializer(osoby, many = True)
         return Response(serializer.data)
     if request.method == "POST" :
@@ -129,6 +140,7 @@ def welcome_view(request):
         </body></html>"""
     return HttpResponse(html)
 
+@login_required
 def person_list_html(request):
     # pobieramy wszystkie obiekty Person z bazy poprzez QuerySet
     persons = Person.objects.all()
@@ -146,3 +158,30 @@ def person_detail_html(request, id):
     return render(request,
                   "folder_aplikacji/person/detail.html",
                   {'person': person})
+
+#class TeamDetail(APIView):
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated, CustomDjangoModelPermissions]
+
+    # dodanie tej metody lub pola klasy o nazwie queryset jest niezbędne
+    # aby DjangoModelPermissions działało poprawnie (stosowny błąd w oknie konsoli
+    # nam o tym przypomni)
+    def get_queryset(self):
+        return Team.objects.all()
+
+    def get_object(self, pk):
+        try:
+            return Team.objects.get(pk=pk)
+        except Team.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        team = self.get_object(pk)
+        serializer = TeamSerializer(team)
+        return Response(serializer.data)
+
+
+    def delete(self, request, pk, format=None):
+        team = self.get_object(pk)
+        team.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -13,4 +13,5 @@ urlpatterns = [
     path('osoby/', views.osoba_list),
     path('osoby/<int:pk>/', views.osoba_detail),
     path('osoby/search/<str:substring>/', views.osoba_search),
+    path('team<int:pk>/', views.TeamDetail.as_view(),name = 'team_detail')
 ]
