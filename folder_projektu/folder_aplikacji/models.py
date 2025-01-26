@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.timezone import now
 from datetime import date
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -47,6 +48,7 @@ class osoba(models.Model):
     plec = models.IntegerField(choices = PLCIE.choices, default = PLCIE.choices[2][0])
     stanowisko = models.ForeignKey('Stanowisko', on_delete = models.CASCADE)
     data_dodania = models.DateField(default = date.today, blank=False, null=False)  #Automatycznie dodawaj aktualna date inie moozna tego edytowac
+    wlasciciel = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return f'{self.imie} {self.nazwisko}'

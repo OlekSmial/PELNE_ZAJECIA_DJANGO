@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view,authentication_classes, permission_classes
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication,TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Person, Team, osoba
@@ -24,7 +24,7 @@ def person_list(request):
 
 
 @api_view(['GET'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
+@authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def person_detail(request, pk):
 
@@ -47,10 +47,10 @@ def person_detail(request, pk):
         return Response(serializer.data)
 
 
-@api_view(['PUT', 'DELETE'])
+@api_view(['PUT'])
 @authentication_classes([SessionAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])
-def person_update_delete(request, pk):
+def person_update(request, pk):
 
     """
     :param request: obiekt DRF Request
@@ -68,21 +68,32 @@ def person_update_delete(request, pk):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['DELETE'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated]) 
+def person_delete(request, pk):
+    try:
+        person = Person.objects.get(pk=pk)
+    except Person.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
-    elif request.method == 'DELETE':
+    if request.method == 'DELETE':
         person.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 @api_view(['GET', 'POST'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
 def osoba_list(request):
     if request.method == "GET":
-        osoby = osoba.objects.all()
+        osoby = osoba.objects.filter(wlasciciel = request.user)
         serializer = osobaSerializer(osoby, many = True)
         return Response(serializer.data)
     if request.method == "POST" :
         serializer = osobaSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(wlasciel= request.user)
             return Response(serializer.data, status= status.HTTP_201_CREATED)
         return Response(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
     
