@@ -1,4 +1,4 @@
-Tytul zajęć: Zajecia 1 aplikacje webowe gr4 SWPS </br>
+PEŁNE 10 LABORATORIÓW 
 Autorzy:
 * Aleksander Śmiałowski
-* i ta malpa glupia  
+
